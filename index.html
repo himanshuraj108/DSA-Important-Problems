@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Mastery — Problem Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --bg: #09090f;
+    --surface: #10101a;
+    --surface2: #16162a;
+    --border: #1e1e35;
+    --border2: #2a2a4a;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --accent4: #f7971e;
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3d3d5c;
+    --glow: rgba(108, 99, 255, 0.15);
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ANIMATED BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(108,99,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,101,132,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(67,233,123,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* GRID OVERLAY */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+    background: rgba(9,9,15,0.85);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    gap: 24px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span {
+    color: var(--accent);
+  }
+
+  /* SEARCH */
+  .search-wrap {
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    width: 16px;
+    height: 16px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px 10px 40px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 30px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .stat-dot.done { background: var(--accent3); box-shadow: 0 0 8px var(--accent3); }
+  .stat-dot.todo { background: var(--text-muted); }
+
+  /* HERO SECTION */
+  .hero {
+    padding: 64px 0 48px;
+  }
+
+  .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+    max-width: 700px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 500px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  /* PROGRESS OVERVIEW */
+  .progress-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+
+  .progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .progress-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border2);
+  }
+
+  .progress-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .progress-card.total::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .progress-card.completed::before { background: linear-gradient(90deg, var(--accent3), #00c9ff); }
+  .progress-card.remaining::before { background: linear-gradient(90deg, var(--accent4), var(--accent2)); }
+  .progress-card.streak::before { background: linear-gradient(90deg, #f7971e, #ffd200); }
+
+  .card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .progress-card.total .card-num { color: var(--accent); }
+  .progress-card.completed .card-num { color: var(--accent3); }
+  .progress-card.remaining .card-num { color: var(--accent4); }
+  .progress-card.streak .card-num { color: #ffd200; }
+
+  .card-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .card-bar {
+    margin-top: 14px;
+    height: 3px;
+    background: var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .card-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .progress-card.completed .card-bar-fill { background: var(--accent3); }
+  .progress-card.remaining .card-bar-fill { background: var(--accent4); }
+
+  /* FILTER TABS */
+  .filter-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .filter-tab:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .filter-tab.active {
+    background: rgba(108,99,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-tab .badge {
+    background: var(--border2);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .filter-tab.active .badge {
+    background: rgba(108,99,255,0.3);
+    color: var(--accent);
+  }
+
+  /* DIFFICULTY FILTER */
+  .diff-filters {
+    display: flex;
+    gap: 8px;
+  }
+
+  .diff-btn {
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .diff-btn.easy.active { background: rgba(67,233,123,0.1); border-color: var(--accent3); color: var(--accent3); }
+  .diff-btn.medium.active { background: rgba(247,151,30,0.1); border-color: var(--accent4); color: var(--accent4); }
+  .diff-btn.hard.active { background: rgba(255,101,132,0.1); border-color: var(--accent2); color: var(--accent2); }
+  .diff-btn:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+
+  /* PATTERN SECTION */
+  .pattern-section {
+    margin-bottom: 40px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .pattern-section:hover {
+    border-color: var(--border2);
+  }
+
+  .pattern-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+    gap: 16px;
+    transition: background 0.2s;
+  }
+
+  .pattern-header:hover { background: var(--surface2); }
+
+  .pattern-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .pattern-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.2);
+    border-radius: 6px;
+    padding: 3px 10px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .pattern-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .pattern-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .pattern-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pattern-progress-bar {
+    width: 100px;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .pattern-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pattern-progress-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .chevron {
+    color: var(--text-muted);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+
+  .pattern-section.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .pattern-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .pattern-section.open .pattern-body {
+    display: block;
+  }
+
+  /* PROBLEM ROW */
+  .problem-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    position: relative;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .problem-row:last-child { border-bottom: none; }
+  .problem-row:hover { background: rgba(255,255,255,0.02); }
+
+  .problem-row.completed-row {
+    background: rgba(67,233,123,0.02);
+  }
+
+  /* CHECKBOX */
+  .check-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .check-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .check-box {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .check-box:hover {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.1);
+  }
+
+  .check-input:checked + .check-box {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    box-shadow: 0 0 12px rgba(67,233,123,0.3);
+  }
+
+  .check-box svg {
+    width: 13px;
+    height: 13px;
+    color: var(--bg);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s;
+  }
+
+  .check-input:checked + .check-box svg {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* PROBLEM INFO */
+  .problem-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .problem-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    transition: color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .problem-row.completed-row .problem-name {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dim);
+  }
+
+  .problem-sub {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 3px;
+  }
+
+  /* DIFFICULTY BADGE */
+  .diff-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    flex-shrink: 0;
+  }
+
+  .diff-badge.easy { color: var(--accent3); border-color: rgba(67,233,123,0.25); background: rgba(67,233,123,0.07); }
+  .diff-badge.medium { color: var(--accent4); border-color: rgba(247,151,30,0.25); background: rgba(247,151,30,0.07); }
+  .diff-badge.hard { color: var(--accent2); border-color: rgba(255,101,132,0.25); background: rgba(255,101,132,0.07); }
+  .diff-badge.default { color: var(--text-muted); border-color: var(--border2); background: transparent; }
+
+  /* LINKS */
+  .problem-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .prob-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .prob-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(108,99,255,0.08);
+  }
+
+  .prob-link svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  /* SUBGROUP */
+  .subgroup-label {
+    padding: 8px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.01);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .subgroup-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-muted);
+  }
+
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    opacity: 0.3;
+  }
+
+  .empty-state p {
+    font-size: 15px;
+    opacity: 0.6;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 80px;
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* RESET BUTTON */
+  .reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(255,101,132,0.07);
+  }
+
+  .hidden { display: none !important; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 9999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast svg { width: 16px; height: 16px; }
+  .toast.done { border-color: rgba(67,233,123,0.4); }
+  .toast.done svg { color: var(--accent3); }
+  .toast.undone { border-color: var(--border2); }
+  .toast.undone svg { color: var(--text-muted); }
+
+  /* MARK ALL */
+  .mark-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .mark-all-btn:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    background: rgba(67,233,123,0.06);
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 32px; }
+    .stats-bar { display: none; }
+    .pattern-title { font-size: 15px; }
+    .problem-links { display: none; }
+    .diff-filters { display: none; }
+    .problem-row { padding: 12px 16px; }
+    .pattern-header { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <span class="logo-text">DSA<span>Track</span></span>
+    </a>
+
+    <div class="search-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search problems...">
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-pill">
+        <div class="stat-dot done"></div>
+        <span id="headerDone">0</span> solved
+      </div>
+      <div class="stat-pill">
+        <div class="stat-dot todo"></div>
+        <span id="headerTotal">0</span> total
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-label">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      DSA IMPORTANT PROBLEMS
+    </div>
+    <h1>Master Every <em>Algorithm</em><br>Pattern</h1>
+    <p>Track your DSA journey across patterns. Check off problems as you solve them — progress is saved automatically.</p>
+  </section>
+
+  <!-- PROGRESS CARDS -->
+  <div class="progress-overview">
+    <div class="progress-card total">
+      <div class="card-num" id="totalCount">0</div>
+      <div class="card-label">Total Problems</div>
+    </div>
+    <div class="progress-card completed">
+      <div class="card-num" id="solvedCount">0</div>
+      <div class="card-label">Solved</div>
+      <div class="card-bar"><div class="card-bar-fill" id="solvedBar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-card remaining">
+      <div class="card-num" id="remainingCount">0</div>
+      <div class="card-label">Remaining</div>
+      <div class="card-bar"><div class="card-bar-fill" id="remainingBar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-card streak">
+      <div class="card-num" id="pctCount">0%</div>
+      <div class="card-label">Completion</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-section">
+    <div class="filter-tabs" id="filterTabs">
+      <button class="filter-tab active" data-filter="all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        All <span class="badge" id="allBadge">0</span>
+      </button>
+      <button class="filter-tab" data-filter="todo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+        To Do <span class="badge" id="todoBadge">0</span>
+      </button>
+      <button class="filter-tab" data-filter="done">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Solved <span class="badge" id="doneBadge">0</span>
+      </button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div class="diff-filters">
+        <button class="diff-btn easy" data-diff="easy">Easy</button>
+        <button class="diff-btn medium" data-diff="medium">Medium</button>
+        <button class="diff-btn hard" data-diff="hard">Hard</button>
+      </div>
+      <button class="reset-btn" id="resetBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.9"/></svg>
+        Reset All
+      </button>
+    </div>
+  </div>
+
+  <!-- PROBLEMS LIST -->
+  <div id="problemsContainer"></div>
+
+  <div id="emptyState" class="empty-state hidden">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <p>No problems match your search or filter.</p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Problem marked as solved!</span>
+</div>
+
+<footer>
+  <div class="container">DSA Mastery Tracker — Progress auto-saved to your browser</div>
+</footer>
+
+<script>
+// ==================== DATA ====================
+const patterns = [
+  {
+    id: 'two-pointers',
+    title: 'Two Pointers',
+    num: '01',
+    problems: [
+      { id: 'p1', name: 'Pair with Target Sum', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/description/'}] },
+      { id: 'p2', name: 'Rearrange 0 and 1', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/segregate-0s-and-1s5106/1'}] },
+      { id: 'p3', name: 'Remove Duplicates', difficulty: 'easy', links: [{label:'LC #1',url:'https://leetcode.com/problems/remove-duplicates-from-sorted-list/'},{label:'LC #2',url:'https://leetcode.com/problems/remove-duplicates-from-sorted-array/description/'},{label:'LC #3',url:'https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/'}] },
+      { id: 'p4', name: 'Squaring a Sorted Array', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/squares-of-a-sorted-array/'}] },
+      { id: 'p5', name: 'Triplet Sum to Zero', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/3sum/'}] },
+      { id: 'p6', name: 'Triplet Sum Close to Target', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/3sum-closest/'}] },
+      { id: 'p7', name: 'Triplets with Smaller Sum', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/count-triplets-with-sum-smaller-than-x5549/1'}] },
+      { id: 'p8', name: 'Subarrays with Product Less than Target', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/subarray-product-less-than-k/'}] },
+      { id: 'p9', name: 'Dutch National Flag Problem', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/sort-colors/description/'}] },
+      { id: 'p10', name: 'Quadruple Sum to Target', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/4sum/'}] },
+      { id: 'p11', name: 'Comparing Strings containing Backspaces', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/backspace-string-compare/'}] },
+      { id: 'p12', name: 'Minimum Window Sort', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/shortest-unsorted-continuous-subarray/'}] },
+    ]
+  },
+  {
+    id: 'fast-slow',
+    title: 'Fast & Slow Pointers',
+    num: '02',
+    problems: [
+      { id: 'p13', name: 'LinkedList Cycle', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/linked-list-cycle/'}] },
+      { id: 'p14', name: 'Start of LinkedList Cycle', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/linked-list-cycle-ii/'}] },
+      { id: 'p15', name: 'Happy Number', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/happy-number/'}] },
+      { id: 'p16', name: 'Find Duplicate Number', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/find-the-duplicate-number/description/'}] },
+      { id: 'p17', name: 'Middle of the LinkedList', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/middle-of-the-linked-list/'}] },
+      { id: 'p18', name: 'Palindrome LinkedList', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/palindrome-linked-list/'}] },
+      { id: 'p19', name: 'Rearrange a LinkedList', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/reorder-list/'}] },
+      { id: 'p20', name: 'Cycle in a Circular Array', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/circular-array-loop/'}] },
+    ]
+  },
+  {
+    id: 'sliding-window',
+    title: 'Sliding Window',
+    num: '03',
+    problems: [
+      { id: 'p21', name: 'Maximum Sum Subarray of Size K', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/max-sum-subarray-of-size-k5313/1'}] },
+      { id: 'p22', name: 'Smallest Subarray with a given sum', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/minimum-size-subarray-sum/'}] },
+      { id: 'p23', name: 'Longest Substring with K Distinct Characters', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/longest-k-unique-characters-substring0853/1'}] },
+      { id: 'p24', name: 'Fruits into Baskets', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/fruit-into-baskets/'}] },
+      { id: 'p25', name: 'No-repeat Substring', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/longest-substring-without-repeating-characters/'}] },
+      { id: 'p26', name: 'Longest Substring with Same Letters after Replacement', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/longest-repeating-character-replacement/'}] },
+      { id: 'p27', name: 'Longest Subarray with Ones after Replacement', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/max-consecutive-ones-iii/'}] },
+      { id: 'p28', name: 'Minimum Size Substring', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/minimum-window-substring/description/'}] },
+      { id: 'p29', name: 'Permutation in a String', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/permutation-in-string/'}] },
+      { id: 'p30', name: 'String Anagrams', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/find-all-anagrams-in-a-string/'}] },
+      { id: 'p31', name: 'Words Concatenation', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/substring-with-concatenation-of-all-words/'}] },
+    ]
+  },
+  {
+    id: 'kadane',
+    title: 'Kadane Pattern',
+    num: '04',
+    problems: [
+      { id: 'p32', name: 'Maximum Subarray Sum', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-subarray/'}] },
+      { id: 'p33', name: 'Minimum Subarray Sum', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/smallest-sum-contiguous-subarray/1'}] },
+      { id: 'p34', name: 'Maximum Product Subarray', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-product-subarray/'}] },
+      { id: 'p35', name: 'Maximum Subarray Sum with One Deletion', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-subarray-sum-with-one-deletion/description/'}] },
+      { id: 'p36', name: 'Maximum Absolute Sum of Any Subarray', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-absolute-sum-of-any-subarray/'}] },
+      { id: 'p37', name: 'Maximum Sum in Circular Array', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-sum-circular-subarray/'}] },
+    ]
+  },
+  {
+    id: 'prefix-sum',
+    title: 'Prefix Sum',
+    num: '05',
+    problems: [
+      { id: 'p38', name: 'Subarray Sum Equals K', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/subarray-sum-equals-k/description/'}] },
+      { id: 'p39', name: 'Find Pivot Index', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/find-pivot-index/description/'}] },
+      { id: 'p40', name: 'Subarray Sums Divisible By K', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/subarray-sums-divisible-by-k/description/'}] },
+      { id: 'p41', name: 'Contiguous Array', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/contiguous-array/description/'}] },
+      { id: 'p42', name: 'Shortest Subarray With Sum at Least K', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/shortest-subarray-with-sum-at-least-k/description/'}] },
+      { id: 'p43', name: 'Count Range Sum', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/count-of-range-sum/description/'}] },
+    ]
+  },
+  {
+    id: 'merge-intervals',
+    title: 'Merge Intervals',
+    num: '06',
+    problems: [
+      { id: 'p44', name: 'Merge Intervals', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/merge-intervals/description/'}] },
+      { id: 'p45', name: 'Insert Interval', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/insert-interval/'}] },
+      { id: 'p46', name: 'Intervals Intersection', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/interval-list-intersections/description/'}] },
+      { id: 'p47', name: 'Overlapping Intervals', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/check-if-any-two-intervals-overlap-among-a-given-set-of-intervals/'}] },
+      { id: 'p48', name: 'Minimum Meeting Rooms', difficulty: 'hard', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/attend-all-meetings-ii/1'}] },
+      { id: 'p49', name: 'Maximum CPU Load', difficulty: 'hard', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/maximum-cpu-load-from-the-given-list-of-jobs/'}] },
+      { id: 'p50', name: 'Employee Free Time', difficulty: 'hard', links: [{label:'Link',url:'https://www.codertrain.co/employee-free-time'}] },
+    ]
+  },
+  {
+    id: 'cyclic-sort',
+    title: 'Cyclic Sort',
+    num: '07',
+    problems: [
+      { id: 'p51', name: 'Cyclic Sort', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/sort-an-array-which-contain-1-to-n-values-in-on-using-cycle-sort/'}] },
+      { id: 'p52', name: 'Find the Missing Number', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/missing-number/'}] },
+      { id: 'p53', name: 'Find all Missing Numbers', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/'}] },
+      { id: 'p54', name: 'Find the Duplicate Number', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/find-the-duplicate-number/'}] },
+      { id: 'p55', name: 'Find all Duplicate Numbers', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/find-all-duplicates-in-an-array/'}] },
+      { id: 'p56', name: 'Find the Corrupt Pair', difficulty: 'easy', links: [{label:'Link',url:'https://thecodingsimplified.com/find-currupt-pair/'}] },
+      { id: 'p57', name: 'Find the Smallest Missing Positive Number', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/first-missing-positive/'}] },
+      { id: 'p58', name: 'Find the First K Missing Positive Numbers', difficulty: 'hard', links: [{label:'Link',url:'https://thecodingsimplified.com/find-the-first-k-missing-positive-number/'}] },
+    ]
+  },
+  {
+    id: 'linkedlist-reversal',
+    title: 'In-place Reversal of LinkedList',
+    num: '08',
+    problems: [
+      { id: 'p59', name: 'Reverse a LinkedList', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/reverse-linked-list/'}] },
+      { id: 'p60', name: 'Reverse a Sub-list', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/reverse-linked-list-ii/'}] },
+      { id: 'p61', name: 'Reverse List in Pairs', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/swap-nodes-in-pairs/description/'}] },
+      { id: 'p62', name: 'Reverse every K-element Sub-list', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/reverse-nodes-in-k-group/'}] },
+      { id: 'p63', name: 'Reverse nodes in EVEN Length Groups', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/reverse-nodes-in-even-length-groups/description/'}] },
+      { id: 'p64', name: 'Rotate a LinkedList', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/rotate-list/'}] },
+    ]
+  },
+  {
+    id: 'stack',
+    title: 'Stack',
+    num: '09',
+    problems: [
+      { id: 'p65', name: 'Remove Adjacent Duplicates', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/description/'}] },
+      { id: 'p66', name: 'Balanced Parentheses', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/valid-parentheses/description/'}] },
+      { id: 'p67', name: 'Next Greater Element', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/next-greater-element-ii/description/'}] },
+      { id: 'p68', name: 'Daily Temperatures', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/daily-temperatures/'}] },
+      { id: 'p69', name: 'Remove Nodes From Linked List', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/remove-nodes-from-linked-list/'}] },
+      { id: 'p70', name: 'Remove All Adjacent Duplicates in String II', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/'}] },
+      { id: 'p71', name: 'Simplify Path', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/simplify-path/'}] },
+      { id: 'p72', name: 'Remove K Digits', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/remove-k-digits/'}] },
+    ]
+  },
+  {
+    id: 'hash-maps',
+    title: 'Hash Maps',
+    num: '10',
+    problems: [
+      { id: 'p73', name: 'First Non-repeating Character', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/first-unique-character-in-a-string/'}] },
+      { id: 'p74', name: 'Maximum Number of Balloons', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-number-of-balloons/'}] },
+      { id: 'p75', name: 'Longest Palindrome', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/longest-palindrome/'}] },
+      { id: 'p76', name: 'Ransom Note', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/ransom-note/'}] },
+    ]
+  },
+  {
+    id: 'binary-search',
+    title: 'Binary Search',
+    num: '11',
+    problems: [
+      { id: 'p77', name: 'Binary Search Basic', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-search/'}] },
+      { id: 'p78', name: 'Upper Bound / Ceiling', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/ceil-in-a-sorted-array/1'}] },
+      { id: 'p79', name: 'First and Last Position', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/'}] },
+      { id: 'p80', name: 'Count Number of Occurrences', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/number-of-occurrence2259/1'}] },
+      { id: 'p81', name: 'Search in Infinite Sorted Array', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/find-position-element-sorted-array-infinite-numbers/'}] },
+      { id: 'p82', name: 'Peak Index in Mountain', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/peak-index-in-a-mountain-array/'}] },
+      { id: 'p83', name: 'Find Peak in Mountain Range', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/find-peak-element/'}] },
+      { id: 'p84', name: 'Find Minimum in Rotated Sorted Array', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/'}] },
+      { id: 'p85', name: 'Find Number of Rotations to Sorted Array', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/rotation4723/1'}] },
+      { id: 'p86', name: 'Search in Rotated Sorted Array', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/search-in-rotated-sorted-array/description/'}] },
+      { id: 'p87', name: 'KOKO Eating Bananas', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/koko-eating-bananas/'}] },
+      { id: 'p88', name: 'Min Days to Make M Bouquets', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets/'}] },
+      { id: 'p89', name: 'Aggressive Cows', difficulty: 'hard', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/aggressive-cows/1'}] },
+      { id: 'p90', name: 'H Index 2', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/h-index-ii/description/'}] },
+      { id: 'p91', name: 'Max Candies to K Children', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-candies-allocated-to-k-children/description/'}] },
+      { id: 'p92', name: 'Capacity to Ship Packages in D Days', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/description/'}] },
+      { id: 'p93', name: 'Book Allocation Problem', difficulty: 'hard', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1'}] },
+      { id: 'p94', name: 'Split Largest Array', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/split-array-largest-sum/description/'}] },
+      { id: 'p95', name: 'Search 2D Matrix', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/search-a-2d-matrix/'}] },
+      { id: 'p96', name: 'Search 2D Matrix II', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/search-a-2d-matrix-ii/description/'}] },
+      { id: 'p97', name: 'Kth Smallest in Sorted Matrix', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/description/'}] },
+      { id: 'p98', name: 'Kth Smallest in Multiplication Matrix', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/kth-smallest-number-in-multiplication-table/description/'}] },
+      { id: 'p99', name: 'Median of 2 Sorted Arrays', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/median-of-two-sorted-arrays/'}] },
+    ]
+  },
+  {
+    id: 'heap',
+    title: 'Heap Pattern',
+    num: '12',
+    problems: [
+      { id: 'p100', name: 'Kth Smallest Element', difficulty: 'medium', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/kth-smallest-element5635/1'}] },
+      { id: 'p101', name: 'Kth Largest Element in an Array', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/kth-largest-element-in-an-array/description/'}] },
+      { id: 'p102', name: 'Top K Frequent Elements', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/top-k-frequent-elements/description/'}] },
+      { id: 'p103', name: 'Top K Frequent Words', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/top-k-frequent-words/description/'}] },
+      { id: 'p104', name: 'K Closest Points to Origin', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/k-closest-points-to-origin/description/'}] },
+      { id: 'p105', name: 'Find K Closest Elements', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/find-k-closest-elements/description/'}] },
+      { id: 'p106', name: 'Kth Weakest Row in Matrix', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/the-k-weakest-rows-in-a-matrix/description/'}] },
+      { id: 'p107', name: 'Merge K Sorted Arrays', difficulty: 'hard', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/merge-k-sorted-arrays/1'}] },
+      { id: 'p108', name: 'Last Stone Weight', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/last-stone-weight/description/'}] },
+      { id: 'p109', name: 'CPU Task Scheduler', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/task-scheduler/description/'}] },
+      { id: 'p110', name: 'Reorganize String', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/reorganize-string/'}] },
+      { id: 'p111', name: 'Min Number of Refueling Stops', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/minimum-number-of-refueling-stops/description/'}] },
+      { id: 'p112', name: 'IPO', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/ipo/description/'}] },
+      { id: 'p113', name: 'Course Scheduler 3', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/course-schedule-iii/description/'}] },
+      { id: 'p114', name: 'Find Median in Data Stream', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/find-median-from-data-stream/description/'}] },
+      { id: 'p115', name: 'Sliding Window Median', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/sliding-window-median/description/'}] },
+    ]
+  },
+  {
+    id: 'recursion-backtracking',
+    title: 'Recursion & Backtracking',
+    num: '13',
+    problems: [
+      { id: 'p116', name: 'Fibonacci', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/fibonacci-number/description/'}] },
+      { id: 'p117', name: 'Check if String is Palindrome', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/palindrome-string0817/1'}] },
+      { id: 'p118', name: 'Check if Array is Sorted', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/check-if-an-array-is-sorted0701/1'}] },
+      { id: 'p119', name: 'Sum of Digits of a Number', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/sum-of-digits1742/1'}] },
+      { id: 'p120', name: 'Remove Occurrences of a Character in String', difficulty: 'easy', links: [{label:'GFG',url:'https://www.geeksforgeeks.org/problems/remove-all-occurrences-of-a-character-in-a-string/1'}] },
+      { id: 'p121', name: 'Generate Parenthesis', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/generate-parentheses/description/'}] },
+      { id: 'p122', name: 'Letter Combinations of Phone Number', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/letter-combinations-of-a-phone-number/description/'}] },
+      { id: 'p123', name: 'Permutations', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/permutations/description/'}] },
+      { id: 'p124', name: 'Combination Sum', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/combination-sum/description/'}] },
+      { id: 'p125', name: 'Palindrome Partition', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/palindrome-partitioning/description/'}] },
+    ]
+  },
+  {
+    id: 'tree',
+    title: 'Tree Pattern',
+    num: '14',
+    subgroups: [
+      {
+        label: 'Traversal',
+        problems: [
+          { id: 'p126', name: 'Inorder Traversal', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-inorder-traversal/description/'}] },
+          { id: 'p127', name: 'Preorder Traversal', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-preorder-traversal/description/'}] },
+          { id: 'p128', name: 'Postorder Traversal', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-postorder-traversal/description/'}] },
+          { id: 'p129', name: 'Level Order Traversal', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-level-order-traversal/description/'}] },
+          { id: 'p130', name: 'ZigZag Order Traversal', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/description/'}] },
+          { id: 'p131', name: 'Level Order II Traversal', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-level-order-traversal-ii/description/'}] },
+        ]
+      },
+      {
+        label: 'Mirror & Symmetry',
+        problems: [
+          { id: 'p132', name: 'Invert Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/invert-binary-tree/description/'}] },
+          { id: 'p133', name: 'Symmetric Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/symmetric-tree/description/'}] },
+          { id: 'p134', name: 'Same Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/same-tree/description/'}] },
+          { id: 'p135', name: 'Subtree of Another Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/subtree-of-another-tree/description/'}] },
+          { id: 'p136', name: 'Flip Equivalent Binary Trees', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/flip-equivalent-binary-trees/description/'}] },
+        ]
+      },
+      {
+        label: 'Search',
+        problems: [
+          { id: 'p137', name: 'LCA of Binary Tree', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/'}] },
+          { id: 'p138', name: 'Search in Binary Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/search-in-a-binary-search-tree/'}] },
+          { id: 'p139', name: 'LCA of BST', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/description/'}] },
+          { id: 'p140', name: 'LCA of Deepest Leaves', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves/description/'}] },
+          { id: 'p141', name: 'Two Sum IV', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/two-sum-iv-input-is-a-bst/description/'}] },
+          { id: 'p142', name: 'Kth Smallest in BST', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/kth-smallest-element-in-a-bst/description/'}] },
+        ]
+      },
+      {
+        label: 'Validation',
+        problems: [
+          { id: 'p143', name: 'Minimum Depth of Binary Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/minimum-depth-of-binary-tree/description/'}] },
+          { id: 'p144', name: 'Maximum Depth of Binary Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/maximum-depth-of-binary-tree/description/'}] },
+          { id: 'p145', name: 'Balanced Binary Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/balanced-binary-tree/description/'}] },
+          { id: 'p146', name: 'Diameter of Binary Tree', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/diameter-of-binary-tree/description/'}] },
+          { id: 'p147', name: 'Binary Tree Tilt', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-tilt/description/'}] },
+          { id: 'p148', name: 'Check Completeness of Binary Tree', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/check-completeness-of-a-binary-tree/description/'}] },
+          { id: 'p149', name: 'Validate BST', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/validate-binary-search-tree/description/'}] },
+          { id: 'p150', name: 'Recover BST', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/recover-binary-search-tree/description/'}] },
+        ]
+      },
+      {
+        label: 'Path Sum',
+        problems: [
+          { id: 'p151', name: 'Path Sum', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/path-sum/description/'}] },
+          { id: 'p152', name: 'Path Sum II', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/path-sum-ii/'}] },
+          { id: 'p153', name: 'Path Sum III', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/path-sum-iii/'}] },
+          { id: 'p154', name: 'Sum of Root to Leaf', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/sum-root-to-leaf-numbers/description/'}] },
+          { id: 'p155', name: 'Maximum Path Sum', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/binary-tree-maximum-path-sum/description/'}] },
+        ]
+      },
+      {
+        label: 'Construction',
+        problems: [
+          { id: 'p156', name: 'Construct Tree from Preorder & Inorder', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/'}] },
+          { id: 'p157', name: 'Construct Tree from Postorder & Inorder', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/description/'}] },
+          { id: 'p158', name: 'Construct Tree from Preorder & Postorder', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/description/'}] },
+          { id: 'p159', name: 'Sorted Array to BST', difficulty: 'easy', links: [{label:'LC',url:'https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/description/'}] },
+          { id: 'p160', name: 'Sorted List to BST', difficulty: 'medium', links: [{label:'LC',url:'https://leetcode.com/problems/convert-sorted-list-to-binary-search-tree/description/'}] },
+          { id: 'p161', name: 'Serialize and Deserialize Binary Tree', difficulty: 'hard', links: [{label:'LC',url:'https://leetcode.com/problems/serialize-and-deserialize-binary-tree/description/'}] },
+        ]
+      }
+    ]
+  },
+];
+
+// Flatten all problems
+function getAllProblems() {
+  const all = [];
+  for (const pat of patterns) {
+    if (pat.problems) {
+      pat.problems.forEach(p => all.push({...p, patternId: pat.id}));
+    }
+    if (pat.subgroups) {
+      pat.subgroups.forEach(sg => {
+        sg.problems.forEach(p => all.push({...p, patternId: pat.id}));
+      });
+    }
+  }
+  return all;
+}
+
+// ==================== STATE ====================
+const STORAGE_KEY = 'dsa_tracker_v1';
+
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch { return {}; }
+}
+
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+let currentFilter = 'all';
+let currentDiff = null;
+let searchQuery = '';
+
+// ==================== RENDER ====================
+function getDiffClass(d) {
+  if (!d) return 'default';
+  return d.toLowerCase();
+}
+
+function getProblemById(id) {
+  const all = getAllProblems();
+  return all.find(p => p.id === id);
+}
+
+function getLinkLabel(url) {
+  if (url.includes('geeksforgeeks')) return 'GFG';
+  if (url.includes('leetcode')) return 'LC';
+  return 'Link';
+}
+
+function renderLinkIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+}
+
+function renderCheckIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+}
+
+function problemMatchesFilters(p) {
+  const done = !!state[p.id];
+  if (currentFilter === 'done' && !done) return false;
+  if (currentFilter === 'todo' && done) return false;
+  if (currentDiff && p.difficulty !== currentDiff) return false;
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    if (!p.name.toLowerCase().includes(q)) return false;
+  }
+  return true;
+}
+
+function renderProblemRow(p, delay = 0) {
+  const done = !!state[p.id];
+  const links = p.links || [];
+  return `
+    <div class="problem-row ${done ? 'completed-row' : ''}" id="row-${p.id}" style="animation-delay:${delay}ms">
+      <label class="check-wrap">
+        <input type="checkbox" class="check-input" data-id="${p.id}" ${done ? 'checked' : ''}>
+        <span class="check-box">${renderCheckIcon()}</span>
+      </label>
+      <div class="problem-info">
+        <div class="problem-name">${p.name}</div>
+        <div class="problem-sub">
+          <span class="diff-badge ${getDiffClass(p.difficulty)}">${p.difficulty || 'n/a'}</span>
+        </div>
+      </div>
+      <div class="problem-links">
+        ${links.slice(0, 3).map((l, i) => `
+          <a class="prob-link" href="${l.url}" target="_blank" rel="noopener">
+            ${renderLinkIcon()}
+            ${l.label || getLinkLabel(l.url)}${links.length > 1 ? ` #${i+1}` : ''}
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderPatternSection(pat) {
+  // Collect all problems in this pattern
+  let allProblems = [];
+  if (pat.problems) allProblems = pat.problems;
+  if (pat.subgroups) pat.subgroups.forEach(sg => allProblems = allProblems.concat(sg.problems));
+
+  // Filter check
+  const visibleProblems = allProblems.filter(p => problemMatchesFilters(p));
+  if (visibleProblems.length === 0) return '';
+
+  const total = allProblems.length;
+  const solved = allProblems.filter(p => state[p.id]).length;
+  const pct = total > 0 ? Math.round((solved/total)*100) : 0;
+
+  let bodyHtml = '';
+  if (pat.subgroups) {
+    for (const sg of pat.subgroups) {
+      const visibleSg = sg.problems.filter(p => problemMatchesFilters(p));
+      if (visibleSg.length === 0) continue;
+      bodyHtml += `<div class="subgroup-label">${sg.label}</div>`;
+      visibleSg.forEach((p, i) => { bodyHtml += renderProblemRow(p, i * 30); });
+    }
+  } else {
+    visibleProblems.forEach((p, i) => { bodyHtml += renderProblemRow(p, i * 30); });
+  }
+
+  const isOpen = document.getElementById(`pat-${pat.id}`)?.classList.contains('open');
+
+  return `
+    <div class="pattern-section open" id="pat-${pat.id}">
+      <div class="pattern-header" onclick="togglePattern('${pat.id}')">
+        <div class="pattern-header-left">
+          <span class="pattern-num">${pat.num}</span>
+          <span class="pattern-title">${pat.title}</span>
+        </div>
+        <div class="pattern-header-right">
+          <div class="pattern-progress">
+            <div class="pattern-progress-bar">
+              <div class="pattern-progress-fill" style="width:${pct}%"></div>
+            </div>
+            <span class="pattern-progress-text">${solved}/${total}</span>
+          </div>
+          <button class="mark-all-btn" onclick="event.stopPropagation(); markAllPattern('${pat.id}')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Mark All
+          </button>
+          <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="pattern-body">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+function renderAll() {
+  const container = document.getElementById('problemsContainer');
+  const empty = document.getElementById('emptyState');
+  
+  let html = '';
+  let anyVisible = false;
+  for (const pat of patterns) {
+    const s = renderPatternSection(pat);
+    if (s) { html += s; anyVisible = true; }
+  }
+  
+  container.innerHTML = html;
+  empty.classList.toggle('hidden', anyVisible);
+
+  // Re-attach checkboxes
+  document.querySelectorAll('.check-input').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const id = this.dataset.id;
+      state[id] = this.checked;
+      saveState(state);
+      updateRow(id, this.checked);
+      updateStats();
+      showToast(this.checked);
+    });
+  });
+
+  updateStats();
+}
+
+function updateRow(id, done) {
+  const row = document.getElementById(`row-${id}`);
+  if (!row) return;
+  row.classList.toggle('completed-row', done);
+  const nameEl = row.querySelector('.problem-name');
+  if (nameEl) nameEl.style.cssText = done ? 'color:var(--text-muted);text-decoration:line-through;text-decoration-color:var(--text-dim)' : '';
+  // Update pattern progress
+  renderStats();
+}
+
+function renderStats() {
+  // Update progress bars in each pattern header
+  for (const pat of patterns) {
+    let allProblems = pat.problems || [];
+    if (pat.subgroups) pat.subgroups.forEach(sg => allProblems = allProblems.concat(sg.problems));
+    const total = allProblems.length;
+    const solved = allProblems.filter(p => state[p.id]).length;
+    const pct = total > 0 ? Math.round((solved/total)*100) : 0;
+    const fillEl = document.querySelector(`#pat-${pat.id} .pattern-progress-fill`);
+    const textEl = document.querySelector(`#pat-${pat.id} .pattern-progress-text`);
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (textEl) textEl.textContent = `${solved}/${total}`;
+  }
+}
+
+function updateStats() {
+  const all = getAllProblems();
+  const total = all.length;
+  const solved = all.filter(p => state[p.id]).length;
+  const remaining = total - solved;
+  const pct = total > 0 ? Math.round((solved/total)*100) : 0;
+  const todoCnt = all.filter(p => !state[p.id]).length;
+
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('solvedCount').textContent = solved;
+  document.getElementById('remainingCount').textContent = remaining;
+  document.getElementById('pctCount').textContent = pct + '%';
+  document.getElementById('solvedBar').style.width = pct + '%';
+  document.getElementById('remainingBar').style.width = (100 - pct) + '%';
+  document.getElementById('headerDone').textContent = solved;
+  document.getElementById('headerTotal').textContent = total;
+
+  document.getElementById('allBadge').textContent = total;
+  document.getElementById('doneBadge').textContent = solved;
+  document.getElementById('todoBadge').textContent = todoCnt;
+
+  renderStats();
+}
+
+// ==================== INTERACTIONS ====================
+function togglePattern(id) {
+  const sec = document.getElementById(`pat-${id}`);
+  if (sec) sec.classList.toggle('open');
+}
+
+function markAllPattern(patId) {
+  const pat = patterns.find(p => p.id === patId);
+  if (!pat) return;
+  let allProblems = pat.problems || [];
+  if (pat.subgroups) pat.subgroups.forEach(sg => allProblems = allProblems.concat(sg.problems));
+  const allDone = allProblems.every(p => state[p.id]);
+  allProblems.forEach(p => { state[p.id] = !allDone; });
+  saveState(state);
+  renderAll();
+}
+
+// ==================== TOAST ====================
+let toastTimeout;
+function showToast(done) {
+  const toast = document.getElementById('toast');
+  const msg = document.getElementById('toastMsg');
+  clearTimeout(toastTimeout);
+  toast.className = `toast ${done ? 'done' : 'undone'}`;
+  msg.textContent = done ? 'Problem marked as solved!' : 'Problem unmarked.';
+  // swap icon
+  toast.querySelector('svg').innerHTML = done 
+    ? '<polyline points="20 6 9 17 4 12"/>'
+    : '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+  setTimeout(() => toast.classList.add('show'), 10);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ==================== FILTERS ====================
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentFilter = this.dataset.filter;
+    renderAll();
+  });
+});
+
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const d = this.dataset.diff;
+    if (currentDiff === d) {
+      currentDiff = null;
+      this.classList.remove('active');
+    } else {
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentDiff = d;
+    }
+    renderAll();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchQuery = this.value.trim();
+  renderAll();
+});
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    state = {};
+    saveState(state);
+    renderAll();
+  }
+});
+
+// ==================== INIT ====================
+renderAll();
+</script>
+</body>
+</html>
