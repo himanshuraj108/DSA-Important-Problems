@@ -35,7 +35,8 @@
   .fbtn.med.active { background: #d97706; border-color: #d97706; }
   .fbtn.hard.active { background: #dc2626; border-color: #dc2626; }
 
-  .main { padding: 16px 24px; max-width: 900px; }
+  .page-wrap { max-width: 900px; margin: 0 auto; background: #fff; box-shadow: 0 0 0 1px #e0e0e0; }
+  .main { padding: 16px 24px; }
 
   .part { margin-bottom: 14px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #fff; }
   .part-header { display: flex; align-items: center; padding: 10px 14px; cursor: pointer; user-select: none; background: #f8f8f8; border-bottom: 1px solid #eee; gap: 10px; }
@@ -76,6 +77,7 @@
 </head>
 <body>
 
+<div class="page-wrap">
 <header>
   <h1>DSA Master Question Bank</h1>
   <p>Job-Ready Edition — 237 Hand-Picked Problems · LeetCode &amp; HackerRank</p>
@@ -106,6 +108,7 @@
 </div>
 
 <div class="main" id="main"></div>
+</div>
 
 <script>
 const DATA = [
